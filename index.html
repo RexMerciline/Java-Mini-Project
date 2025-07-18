@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Accessible Thane</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --main-color: #f77f00;
+      --secondary-color: #003049;
+      --light-bg: #fdf0d5;
+    }
+    body {
+      transition: background-color 0.5s, color 0.5s;
+      background-color: var(--light-bg);
+      color: var(--secondary-color);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    .dark-mode .card, .dark-mode textarea, .dark-mode input {
+      background-color: #1f1f1f;
+      color: #fff;
+    }
+    #map {
+      height: 500px;
+      width: 100%;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .review-stars span {
+      font-size: 1.5rem;
+      color: gray;
+      cursor: pointer;
+    }
+    .review-stars span.active {
+      color: var(--main-color);
+    }
+    .unbutton {
+      border: none;
+      background: none;
+      font-size: 1.5rem;
+      color: var(--main-color);
+      cursor: pointer;
+      transition: transform 0.4s;
+    }
+    .unbutton.rotate {
+      transform: rotate(180deg);
+    }
+    .btn-primary {
+      background-color: var(--main-color);
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #d65a00;
+    }
+    .form-control:focus {
+      border-color: var(--main-color);
+      box-shadow: 0 0 0 0.2rem rgba(247, 127, 0, 0.25);
+    }
+    h1, h3, h4 {
+      color: var(--secondary-color);
+    }
+    .filter-btns button {
+      margin: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1><span style="color: var(--main-color);">Accessible Thane</span> WebApp</h1>
+      <button id="darkToggle" class="unbutton"><i id="modeIcon" class="fas fa-moon"></i></button>
+    </div>
+
+    <!-- Filter Buttons -->
+    <div class="filter-btns text-center mb-3">
+      <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('all')">Show All</button>
+      <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('hospital')">Hospitals</button>
+      <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('mall')">Malls</button>
+      <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('transport')">Transport</button>
+      <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('restaurant')">Restaurants</button>
+      <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('school')">Schools</button>
+      <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('park')">Parks</button>
+      <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('temple')">Temples</button>
+    </div>
+
+    <!-- Map -->
+    <div id="map"></div>
+
+    <!-- Review Section -->
+    <div id="reviewSection" class="mt-4"></div>
+
+    <!-- Login Redirect -->
+    <div class="text-center mt-4">
+      <p>Want to leave a review or save preferences? <a href="login.html" class="btn btn-outline-primary">Login / Sign Up</a></p>
+    </div>
+
+    <!-- Features Page Redirect -->
+    <div class="text-center mt-2">
+      <a href="place_features_page.html" class="btn btn-warning">View Accessibility Features List</a>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([19.2183, 72.9781], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    }).addTo(map);
+
+    const reviewSection = document.getElementById('reviewSection');
+
+    const categories = {
+      hospital: '🏥',
+      mall: '🛍️',
+      transport: '🚉',
+      restaurant: '🍽️',
+      school: '🏫',
+      park: '🏞️',
+      temple: '🛕'
+    };
+
+    const places = [
+      { name: "Jupiter Hospital", lat: 19.2098, lon: 72.9716, category: 'hospital' },
+      { name: "Hiranandani Hospital", lat: 19.2117, lon: 72.9792, category: 'hospital' },
+      { name: "Civil Hospital", lat: 19.1865, lon: 72.9812, category: 'hospital' },
+      { name: "Bethany Hospital", lat: 19.2113, lon: 72.9559, category: 'hospital' },
+
+      { name: "Viviana Mall", lat: 19.2025, lon: 72.9723, category: 'mall' },
+      { name: "Korum Mall", lat: 19.1978, lon: 72.9695, category: 'mall' },
+      { name: "High Street Mall", lat: 19.2076, lon: 72.9655, category: 'mall' },
+      { name: "R Mall", lat: 19.2430, lon: 72.9820, category: 'mall' },
+
+      { name: "Thane Railway Station", lat: 19.1855, lon: 72.9760, category: 'transport' },
+      { name: "TMT Bus Depot", lat: 19.1971, lon: 72.9744, category: 'transport' },
+      { name: "Metro Line 4 Proposed", lat: 19.2069, lon: 72.9876, category: 'transport' },
+
+      { name: "Barbeque Nation (Viviana)", lat: 19.2027, lon: 72.9724, category: 'restaurant' },
+      { name: "McDonald's (Korum)", lat: 19.1977, lon: 72.9693, category: 'restaurant' },
+      { name: "Domino's (Ghodbunder)", lat: 19.2432, lon: 72.9818, category: 'restaurant' },
+
+      { name: "Sulochanadevi Singhania School", lat: 19.2057, lon: 72.9759, category: 'school' },
+      { name: "Vasant Vihar High School", lat: 19.2121, lon: 72.9482, category: 'school' },
+      { name: "D.A.V. Public School", lat: 19.2208, lon: 72.9764, category: 'school' },
+      { name: "Bedekar College", lat: 19.1982, lon: 72.9755, category: 'school' },
+
+      { name: "Upvan Lake", lat: 19.2186, lon: 72.9564, category: 'park' },
+      { name: "J.K. Singhania Park", lat: 19.2045, lon: 72.9741, category: 'park' },
+      { name: "Ovalekar Wadi Butterfly Park", lat: 19.2453, lon: 72.9958, category: 'park' },
+      { name: "Sanjay Gandhi National Park Entry", lat: 19.2466, lon: 72.9533, category: 'park' },
+
+      { name: "Kopineshwar Mandir", lat: 19.1937, lon: 72.9741, category: 'temple' },
+      { name: "Ganesh Mandir (Pokhran)", lat: 19.2134, lon: 72.9605, category: 'temple' },
+      { name: "Shiv Mandir (Vartak Nagar)", lat: 19.2132, lon: 72.9648, category: 'temple' }
+    ];
+
+    const markers = [];
+
+    function createReviewBlock(placeName) {
+      return `
+        <div class="card p-3 mb-4">
+          <h4>Leave a Review for ${placeName}</h4>
+          <div class="review-stars mb-2">
+            <span data-val="1">★</span>
+            <span data-val="2">★</span>
+            <span data-val="3">★</span>
+            <span data-val="4">★</span>
+            <span data-val="5">★</span>
+          </div>
+          <textarea class="form-control mb-2" rows="3" placeholder="Write your review..."></textarea>
+          <button class="btn btn-primary">Submit Review</button>
+        </div>
+      `;
+    }
+
+    function showReview(placeName) {
+      reviewSection.innerHTML = createReviewBlock(placeName);
+      activateStars();
+      window.scrollTo({ top: reviewSection.offsetTop, behavior: 'smooth' });
+    }
+
+    function activateStars() {
+      const stars = document.querySelectorAll('.review-stars span');
+      stars.forEach(star => {
+        star.addEventListener('click', () => {
+          let val = parseInt(star.getAttribute('data-val'));
+          stars.forEach(s => {
+            s.classList.toggle('active', parseInt(s.getAttribute('data-val')) <= val);
+          });
+        });
+      });
+    }
+
+    places.forEach(place => {
+      const marker = L.marker([place.lat, place.lon]).addTo(map)
+        .bindPopup(`<b>${categories[place.category]} ${place.name}</b><br><button class='btn btn-sm btn-primary mt-2' onclick="showReview('${place.name}')">Review Here</button>`);
+      marker.category = place.category;
+      markers.push(marker);
+    });
+
+    function filterMarkers(type) {
+      markers.forEach(marker => {
+        if (type === 'all' || marker.category === type) {
+          map.addLayer(marker);
+        } else {
+          map.removeLayer(marker);
+        }
+      });
+    }
+
+    const darkBtn = document.getElementById('darkToggle');
+    const icon = document.getElementById('modeIcon');
+    darkBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
+      darkBtn.classList.toggle('rotate');
+      localStorage.setItem('mode', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+
+    if (localStorage.getItem('mode') === 'dark') {
+      document.body.classList.add('dark-mode');
+      icon.classList.remove('fa-moon');
+      icon.classList.add('fa-sun');
+      darkBtn.classList.add('rotate');
+    }
+  </script>
+</body>
+</html>
