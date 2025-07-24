@@ -1,19 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Accessible Features in Thane</title>
 
   <!-- Bootstrap 5 -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
 
+  <!-- Custom Styles -->
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(to right, #E8F5E9, #ffffff);
       color: #1B1B1B;
       padding: 2rem;
+      font-size: 1.2rem;
+      line-height: 1.6;
+    }
+
+    h1, h2, h4 {
+      font-weight: bold;
+    }
+
+    a, button, .btn {
+      font-size: 1.1rem;
+    }
+
+    .high-contrast {
+      background-color: #000 !important;
+      color: #FFD700 !important;
+      border-color: #FFD700 !important;
+    }
+
+    .focus-outline:focus {
+      outline: 3px dashed #2E7D32 !important;
+      outline-offset: 2px;
     }
 
     .category-section {
@@ -30,17 +52,10 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
-    h1 {
-      color: #2E7D32;
-      font-weight: bold;
-    }
-
-    h2 {
-      color: #388E3C;
-    }
-
     .feature-badge {
       margin: 0.25rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 1rem;
     }
 
     .btn-warning {
@@ -54,7 +69,6 @@
       background-color: #FFB300;
     }
 
-    /* Badge color overrides */
     .bg-success {
       background-color: #4CAF50 !important;
     }
@@ -63,55 +77,117 @@
       background-color: #FFF176 !important;
       color: #1B1B1B !important;
     }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
   </style>
 </head>
 <body>
+  <div class="container" role="main">
+    <h1 class="text-center mb-5" tabindex="0">Accessibility Features at Places in Thane</h1>
 
-  <div class="container">
-    <h1 class="text-center mb-5">Accessibility Features at Places in Thane</h1>
-
-    <!-- Sections Below Are Kept the Same as You Provided (Hospitals, Malls, etc.) -->
-    <!-- Only color & style changes applied above -->
-
-    <!-- Example Section -->
-    <div class="category-section">
-      <h2>🏥 Hospitals</h2>
-
-      <div class="place-card">
-        <h4>Jupiter Hospital</h4>
-        <span class="badge bg-success feature-badge">Ramps</span>
-        <span class="badge bg-success feature-badge">Lifts</span>
-        <span class="badge bg-success feature-badge">Wide Corridors</span>
-        <span class="badge bg-success feature-badge">Accessible Toilets</span>
-      </div>
-
-      <div class="place-card">
-        <h4>Hiranandani Hospital</h4>
-        <span class="badge bg-success feature-badge">Fully Accessible</span>
-      </div>
-
-      <div class="place-card">
-        <h4>Civil Hospital</h4>
-        <span class="badge bg-warning text-dark feature-badge">Partial Ramps</span>
-        <span class="badge bg-warning text-dark feature-badge">No Signage</span>
-      </div>
-
-      <div class="place-card">
-        <h4>Bethany Hospital</h4>
-        <span class="badge bg-success feature-badge">Lift</span>
-        <span class="badge bg-success feature-badge">Support Staff Assistance</span>
-      </div>
+    <!-- Accessibility Controls -->
+    <div class="mb-4 text-center">
+      <button class="btn btn-outline-dark me-2" onclick="toggleContrast()" aria-label="Toggle high contrast mode">High Contrast</button>
+      <button class="btn btn-outline-dark me-2" onclick="adjustFontSize(1)" aria-label="Increase text size">A+</button>
+      <button class="btn btn-outline-dark me-2" onclick="adjustFontSize(-1)" aria-label="Decrease text size">A-</button>
+      <button class="btn btn-outline-secondary" onclick="resetFontSize()" aria-label="Reset text size">Reset</button>
     </div>
 
-    <!-- All Other Sections: Malls, Transport, Restaurants, Schools, Parks, Temples -->
-    <!-- Keep your structure exactly the same, all styles will be applied globally -->
+    <!-- Accessible Feature Sections -->
 
-    <!-- ... (Paste rest of your section blocks here) ... -->
+    <!-- 🏥 Hospitals -->
+    <div class="category-section">
+      <h2>🏥 Hospitals</h2>
+      <div class="place-card"><h4>Jupiter Hospital</h4><span class="badge bg-success feature-badge">Ramps</span><span class="badge bg-success feature-badge">Lifts</span><span class="badge bg-success feature-badge">Wide Corridors</span><span class="badge bg-success feature-badge">Accessible Toilets</span></div>
+      <div class="place-card"><h4>Hiranandani Hospital</h4><span class="badge bg-success feature-badge">Fully Accessible</span></div>
+      <div class="place-card"><h4>Civil Hospital</h4><span class="badge bg-warning text-dark feature-badge">Partial Ramps</span><span class="badge bg-warning text-dark feature-badge">No Signage</span></div>
+      <div class="place-card"><h4>Bethany Hospital</h4><span class="badge bg-success feature-badge">Lift</span><span class="badge bg-success feature-badge">Support Staff Assistance</span></div>
+    </div>
 
+    <!-- 🛍️ Malls -->
+    <div class="category-section">
+      <h2>🛍️ Malls</h2>
+      <div class="place-card"><h4>Viviana Mall</h4><span class="badge bg-success feature-badge">Ramps</span><span class="badge bg-success feature-badge">Elevators</span><span class="badge bg-success feature-badge">Accessible Parking</span></div>
+      <div class="place-card"><h4>Korum Mall</h4><span class="badge bg-success feature-badge">Wheelchair Entry</span><span class="badge bg-success feature-badge">Lift Access</span><span class="badge bg-success feature-badge">Restrooms for Disabled</span></div>
+      <div class="place-card"><h4>High Street Mall</h4><span class="badge bg-warning text-dark feature-badge">Partial Ramp Access</span><span class="badge bg-success feature-badge">Staff Help Available</span></div>
+      <div class="place-card"><h4>R Mall</h4><span class="badge bg-success feature-badge">Ramps</span><span class="badge bg-success feature-badge">Elevators</span><span class="badge bg-success feature-badge">Spacious Layout</span></div>
+    </div>
+
+    <!-- 🚉 Transport -->
+    <div class="category-section">
+      <h2>🚉 Transport</h2>
+      <div class="place-card"><h4>Thane Railway Station</h4><span class="badge bg-warning text-dark feature-badge">Ramps (Partial)</span><span class="badge bg-warning text-dark feature-badge">Crowded Access</span></div>
+      <div class="place-card"><h4>TMT Bus Depot</h4><span class="badge bg-success feature-badge">Low-Floor Buses</span><span class="badge bg-warning text-dark feature-badge">Basic Ramp</span></div>
+      <div class="place-card"><h4>Metro Line 4 Proposed</h4><span class="badge bg-warning text-dark feature-badge">Under Construction</span></div>
+    </div>
+
+    <!-- 🍽️ Restaurants -->
+    <div class="category-section">
+      <h2>🍽️ Restaurants</h2>
+      <div class="place-card"><h4>Barbeque Nation (Viviana)</h4><span class="badge bg-success feature-badge">Lift Access via Mall</span><span class="badge bg-success feature-badge">Spacious Seating</span></div>
+      <div class="place-card"><h4>McDonald's (Korum)</h4><span class="badge bg-success feature-badge">Ramp Entry</span><span class="badge bg-success feature-badge">Wheelchair Accessible</span></div>
+      <div class="place-card"><h4>Domino's (Ghodbunder)</h4><span class="badge bg-warning text-dark feature-badge">No Step-Free Access</span></div>
+    </div>
+
+    <!-- 🏫 Schools -->
+    <div class="category-section">
+      <h2>🏫 Schools</h2>
+      <div class="place-card"><h4>Sulochanadevi Singhania School</h4><span class="badge bg-success feature-badge">Ramp Access</span><span class="badge bg-success feature-badge">Accessible Toilets</span></div>
+      <div class="place-card"><h4>Vasant Vihar High School</h4><span class="badge bg-warning text-dark feature-badge">No Lift</span></div>
+      <div class="place-card"><h4>D.A.V. Public School</h4><span class="badge bg-success feature-badge">Support Staff Available</span></div>
+      <div class="place-card"><h4>Bedekar College</h4><span class="badge bg-success feature-badge">Lift</span><span class="badge bg-success feature-badge">Wheelchair Entry</span></div>
+    </div>
+
+    <!-- 🏞️ Parks -->
+    <div class="category-section">
+      <h2>🏞️ Parks</h2>
+      <div class="place-card"><h4>Upvan Lake</h4><span class="badge bg-success feature-badge">Wide Walkways</span><span class="badge bg-success feature-badge">Ramp Access</span></div>
+      <div class="place-card"><h4>J.K. Singhania Park</h4><span class="badge bg-warning text-dark feature-badge">Partial Accessibility</span></div>
+      <div class="place-card"><h4>Ovalekar Wadi Butterfly Park</h4><span class="badge bg-warning text-dark feature-badge">Uneven Paths</span></div>
+      <div class="place-card"><h4>Sanjay Gandhi National Park Entry</h4><span class="badge bg-warning text-dark feature-badge">No Ramp</span></div>
+    </div>
+
+    <!-- 🛕 Temples -->
+    <div class="category-section">
+      <h2>🛕 Temples</h2>
+      <div class="place-card"><h4>Kopineshwar Mandir</h4><span class="badge bg-warning text-dark feature-badge">No Ramp</span></div>
+      <div class="place-card"><h4>Ganesh Mandir (Pokhran)</h4><span class="badge bg-warning text-dark feature-badge">Stairs Only</span></div>
+      <div class="place-card"><h4>Shiv Mandir (Vartak Nagar)</h4><span class="badge bg-warning text-dark feature-badge">Difficult Access</span></div>
+    </div>
+
+    <!-- Back Button -->
     <div class="text-center mt-4">
-      <a href="index.html" class="btn btn-warning">⬅ Back to Map</a>
+      <a href="index.html" class="btn btn-warning focus-outline" aria-label="Back to map">⬅ Back to Map</a>
     </div>
   </div>
 
+  <!-- Accessibility Scripts -->
+  <script>
+    function toggleContrast() {
+      document.body.classList.toggle('high-contrast');
+    }
+
+    let fontSize = 1.2;
+    function adjustFontSize(change) {
+      fontSize += change * 0.1;
+      fontSize = Math.max(0.8, Math.min(fontSize, 2.0));
+      document.body.style.fontSize = fontSize + 'rem';
+    }
+
+    function resetFontSize() {
+      fontSize = 1.2;
+      document.body.style.fontSize = fontSize + 'rem';
+    }
+  </script>
 </body>
 </html>

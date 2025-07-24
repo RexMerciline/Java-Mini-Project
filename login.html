@@ -10,7 +10,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-  <!-- Custom Styling: Nature & Accessibility Theme -->
+  <!-- Custom Styling -->
   <style>
     body {
       background: linear-gradient(135deg, #4CAF50, #E8F5E9);
@@ -21,6 +21,7 @@
       font-family: 'Segoe UI', sans-serif;
       color: #1B1B1B;
       transition: background-color 0.5s, color 0.5s;
+      font-size: 100%;
     }
 
     .dark-mode {
@@ -31,6 +32,20 @@
     .dark-mode .glass-card {
       background: rgba(0, 0, 0, 0.3);
       color: #fff;
+    }
+
+    .high-contrast {
+      background-color: #000 !important;
+      color: #FFFF00 !important;
+    }
+
+    .high-contrast .glass-card,
+    .high-contrast .form-control,
+    .high-contrast .btn,
+    .high-contrast a {
+      background-color: #000 !important;
+      color: #FFFF00 !important;
+      border-color: #FFFF00 !important;
     }
 
     .glass-card {
@@ -86,9 +101,30 @@
     a:hover {
       text-decoration: underline;
     }
+
+    .accessibility-controls {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      z-index: 10;
+    }
+
+    .accessibility-controls button {
+      margin: 2px;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Accessibility Controls -->
+  <div class="accessibility-controls">
+    <button class="btn btn-outline-secondary btn-sm" onclick="changeFontSize(1)">A+</button>
+    <button class="btn btn-outline-secondary btn-sm" onclick="changeFontSize(-1)">A-</button>
+    <button class="btn btn-outline-secondary btn-sm" onclick="resetFontSize()">Reset</button>
+    <button class="btn btn-outline-dark btn-sm" onclick="toggleContrast()">High Contrast</button>
+  </div>
+
+  <!-- Login Card -->
   <div class="glass-card text-center">
     <div class="mb-3">
       <i class="fas fa-user-circle icon"></i>
@@ -118,10 +154,39 @@
     </p>
   </div>
 
-  <!-- Optional Dark Mode Sync -->
+  <!-- Accessibility Scripts -->
   <script>
+    let currentFontSize = 100;
+
+    function changeFontSize(delta) {
+      currentFontSize += delta * 10;
+      document.body.style.fontSize = currentFontSize + '%';
+      localStorage.setItem('fontSize', currentFontSize);
+    }
+
+    function resetFontSize() {
+      currentFontSize = 100;
+      document.body.style.fontSize = '100%';
+      localStorage.setItem('fontSize', 100);
+    }
+
+    function toggleContrast() {
+      document.body.classList.toggle('high-contrast');
+      localStorage.setItem('contrast', document.body.classList.contains('high-contrast') ? 'high' : 'normal');
+    }
+
+    // Load saved settings
     if (localStorage.getItem('mode') === 'dark') {
       document.body.classList.add('dark-mode');
+    }
+
+    if (localStorage.getItem('contrast') === 'high') {
+      document.body.classList.add('high-contrast');
+    }
+
+    if (localStorage.getItem('fontSize')) {
+      currentFontSize = parseInt(localStorage.getItem('fontSize'));
+      document.body.style.fontSize = currentFontSize + '%';
     }
   </script>
 </body>

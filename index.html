@@ -8,21 +8,19 @@
 
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-  
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <!-- Custom Styles: Nature & Accessibility Theme -->
+  <!-- Custom Styles -->
   <style>
     :root {
-      --main-color: #4CAF50;         /* Primary - Leafy Green */
-      --secondary-color: #2E7D32;    /* Secondary - Forest Green */
-      --light-bg: #E8F5E9;           /* Background - Soft Mint */
-      --accent-color: #FFC107;       /* Accent - Warm Yellow */
-      --text-color: #1B1B1B;         /* Text - Charcoal */
+      --main-color: #4CAF50;
+      --secondary-color: #2E7D32;
+      --light-bg: #E8F5E9;
+      --accent-color: #FFC107;
+      --text-color: #1B1B1B;
     }
 
     body {
@@ -42,6 +40,29 @@
     .dark-mode input {
       background-color: #1f1f1f;
       color: #fff;
+    }
+
+    .high-contrast {
+      background-color: #000 !important;
+      color: #FFFF00 !important;
+    }
+
+    .high-contrast .card,
+    .high-contrast .btn,
+    .high-contrast .form-control,
+    .high-contrast .filter-btns button,
+    .high-contrast .btn-outline-primary,
+    .high-contrast .btn-warning {
+      background-color: #000 !important;
+      color: #FFFF00 !important;
+      border-color: #FFFF00 !important;
+    }
+
+    .high-contrast .btn:hover,
+    .high-contrast .btn-outline-primary:hover,
+    .high-contrast .btn-warning:hover {
+      background-color: #FFFF00 !important;
+      color: #000 !important;
     }
 
     #map {
@@ -119,14 +140,13 @@
   </style>
 </head>
 <body>
-  <!-- Main Container -->
   <div class="container py-4">
-    <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h1><span style="color: var(--main-color);">Accessible Thane</span> WebApp</h1>
       <button id="darkToggle" class="unbutton"><i id="modeIcon" class="fas fa-moon"></i></button>
     </div>
-    <!-- Category filter buttons -->
+
+    <!-- Filter Buttons -->
     <div class="filter-btns text-center mb-3">
       <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('all')">Show All</button>
       <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('hospital')">Hospitals</button>
@@ -138,72 +158,51 @@
       <button class="btn btn-sm btn-outline-primary" onclick="filterMarkers('temple')">Temples</button>
     </div>
 
-    <!-- Leaflet map container -->
+    <!-- Accessibility Controls -->
+    <div class="text-center mb-3">
+      <button class="btn btn-outline-secondary btn-sm mx-1" onclick="changeFontSize(1)">A+</button>
+      <button class="btn btn-outline-secondary btn-sm mx-1" onclick="changeFontSize(-1)">A-</button>
+      <button class="btn btn-outline-secondary btn-sm mx-1" onclick="resetFontSize()">Reset</button>
+      <button id="contrastToggle" class="btn btn-outline-dark btn-sm mx-1">Toggle High Contrast</button>
+    </div>
+
+    <!-- Map -->
     <div id="map"></div>
 
-    <!-- Review section (appears after marker click) -->
+    <!-- Review -->
     <div id="reviewSection" class="mt-4"></div>
 
-    <!-- Login redirect for extra features -->
     <div class="text-center mt-4">
-      <p>Want to leave a review or save preferences? 
+      <p>Want to leave a review or save preferences?
         <a href="login.html" class="btn btn-outline-primary">Login / Sign Up</a>
       </p>
     </div>
 
-    <!-- Accessibility feature list -->
     <div class="text-center mt-2">
       <a href="place_features_page.html" class="btn btn-warning">View Accessibility Features List</a>
     </div>
-  </div> <!-- Closing container -->
-  <!-- Leaflet JS for maps -->
+  </div>
+
+  <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-  <!-- Main Script -->
   <script>
-    // Initialize map with Thane coordinates
     const map = L.map('map').setView([19.2183, 72.9781], 13);
-     
-    // Add OpenStreetMap tile layer
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-    }).addTo(map);
-    
-    // Thane polygon boundary
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
     const thaneBoundary = [
-      [19.2870, 72.9746],
-      [19.2654, 73.0203],
-      [19.2308, 73.0205],
-      [19.2075, 72.9994],
-      [19.1802, 72.9780],
-      [19.1713, 72.9484],
-      [19.2052, 72.9205],
-      [19.2477, 72.9275],
-      [19.2751, 72.9490]
+      [19.2870, 72.9746],[19.2654, 73.0203],[19.2308, 73.0205],[19.2075, 72.9994],
+      [19.1802, 72.9780],[19.1713, 72.9484],[19.2052, 72.9205],[19.2477, 72.9275],[19.2751, 72.9490]
     ];
-
-    const thaneOutline = L.polygon(thaneBoundary, {
-      color: 'black',
-      weight: 3,
-      fill: false,
-      dashArray: '4, 4'
-    }).addTo(map);
-
+    const thaneOutline = L.polygon(thaneBoundary, { color: 'black', weight: 3, fill: false, dashArray: '4, 4' }).addTo(map);
     map.fitBounds(thaneOutline.getBounds());
 
     const reviewSection = document.getElementById('reviewSection');
-
     const categories = {
-      hospital: '🏥',
-      mall: '🛍️',
-      transport: '🚉',
-      restaurant: '🍽️',
-      school: '🏫',
-      park: '🏞️',
-      temple: '🛕'
+      hospital: '🏥', mall: '🛍️', transport: '🚉',
+      restaurant: '🍽️', school: '🏫', park: '🏞️', temple: '🛕'
     };
 
-    const places = [
+   const places = [
       // Hospitals
       { name: "Jupiter Hospital", lat: 19.2098, lon: 72.9716, category: 'hospital' },
       { name: "Hiranandani Hospital", lat: 19.2117, lon: 72.9792, category: 'hospital' },
@@ -245,9 +244,25 @@
     ];
 
     const markers = [];
-    // Create and display a review form
-    function createReviewBlock(placeName) {
-      return `
+    places.forEach(place => {
+      const marker = L.marker([place.lat, place.lon]).addTo(map)
+        .bindPopup(`<b>${categories[place.category]} ${place.name}</b><br><button class='btn btn-sm btn-primary mt-2' onclick="showReview('${place.name}')">Review Here</button>`);
+      marker.category = place.category;
+      markers.push(marker);
+    });
+
+    function filterMarkers(type) {
+      markers.forEach(marker => {
+        if (type === 'all' || marker.category === type) {
+          map.addLayer(marker);
+        } else {
+          map.removeLayer(marker);
+        }
+      });
+    }
+
+    function showReview(placeName) {
+      reviewSection.innerHTML = `
         <div class="card p-3 mb-4">
           <h4>Leave a Review for ${placeName}</h4>
           <div class="review-stars mb-2">
@@ -259,17 +274,11 @@
           </div>
           <textarea class="form-control mb-2" rows="3" placeholder="Write your review..."></textarea>
           <button class="btn btn-primary">Submit Review</button>
-        </div>
-      `;
-    }
-
-    function showReview(placeName) {
-      reviewSection.innerHTML = createReviewBlock(placeName);
+        </div>`;
       activateStars();
       window.scrollTo({ top: reviewSection.offsetTop, behavior: 'smooth' });
     }
 
-    // Star rating logic
     function activateStars() {
       const stars = document.querySelectorAll('.review-stars span');
       stars.forEach(star => {
@@ -282,28 +291,21 @@
       });
     }
 
-    // Add markers to map
-    places.forEach(place => {
-      const marker = L.marker([place.lat, place.lon]).addTo(map)
-        .bindPopup(`<b>${categories[place.category]} ${place.name}</b><br><button class='btn btn-sm btn-primary mt-2' onclick="showReview('${place.name}')">Review Here</button>`);
-      marker.category = place.category;
-      markers.push(marker);
-    });
-
-    // Filter markers
-    function filterMarkers(type) {
-      markers.forEach(marker => {
-        if (type === 'all' || marker.category === type) {
-          map.addLayer(marker);
-        } else {
-          map.removeLayer(marker);
-        }
-      });
+    // Font Size Controls
+    let currentFontSize = 100;
+    function changeFontSize(delta) {
+      currentFontSize += delta * 10;
+      document.body.style.fontSize = currentFontSize + '%';
+    }
+    function resetFontSize() {
+      currentFontSize = 100;
+      document.body.style.fontSize = '100%';
     }
 
-    // Dark Mode Toggle
+    // Theme Toggles
     const darkBtn = document.getElementById('darkToggle');
     const icon = document.getElementById('modeIcon');
+    const contrastBtn = document.getElementById('contrastToggle');
 
     darkBtn.addEventListener('click', () => {
       document.body.classList.toggle('dark-mode');
@@ -313,13 +315,46 @@
       localStorage.setItem('mode', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
     });
 
-    // Apply saved mode
+    contrastBtn.addEventListener('click', () => {
+      document.body.classList.toggle('high-contrast');
+      localStorage.setItem('contrast', document.body.classList.contains('high-contrast') ? 'high' : 'normal');
+    });
+
+    // Load saved settings
     if (localStorage.getItem('mode') === 'dark') {
       document.body.classList.add('dark-mode');
       icon.classList.remove('fa-moon');
       icon.classList.add('fa-sun');
       darkBtn.classList.add('rotate');
     }
+    if (localStorage.getItem('contrast') === 'high') {
+      document.body.classList.add('high-contrast');
+    }
+
+    // Show User Location
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(position => {
+    const userLat = position.coords.latitude;
+    const userLon = position.coords.longitude;
+
+    const userMarker = L.marker([userLat, userLon], {
+      icon: L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+        iconSize: [30, 30],
+        iconAnchor: [15, 30],
+        popupAnchor: [0, -30]
+      })
+    }).addTo(map);
+
+    userMarker.bindPopup("<b>Your Location</b>").openPopup();
+    map.setView([userLat, userLon], 14);
+  }, error => {
+    console.warn("Location access denied or unavailable.");
+  });
+} else {
+  console.warn("Geolocation is not supported by this browser.");
+}
+
   </script>
 </body>
 </html>
