@@ -1,0 +1,2424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Accessible Thane - Dashboard</title>
+  
+  <!-- Tailwind CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    :root {
+      --primary: #10b981;
+      --primary-dark: #059669;
+      --secondary: #3b82f6;
+      --accent: #f59e0b;
+      --danger: #ef4444;
+      --dark: #1f2937;
+      --light: #f3f4f6;
+    }
+
+    * {
+      font-family: 'Inter', sans-serif;
+      box-sizing: border-box;
+    }
+
+    body {
+      scroll-behavior: smooth;
+      transition: all 0.3s ease;
+      overflow-x: hidden;
+    }
+
+    .animate-float {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .animate-slide-in {
+      animation: slideIn 0.8s ease-out forwards;
+    }
+
+    @keyframes slideIn {
+      from { 
+        opacity: 0; 
+        transform: translateY(50px); 
+      }
+      to { 
+        opacity: 1; 
+        transform: translateY(0); 
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 1s ease-in forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .animate-bounce-in {
+      animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes bounceIn {
+      0% { 
+        opacity: 0; 
+        transform: scale(0.3); 
+      }
+      50% { 
+        opacity: 1; 
+        transform: scale(1.05); 
+      }
+      70% { 
+        transform: scale(0.9); 
+      }
+      100% { 
+        opacity: 1; 
+        transform: scale(1); 
+      }
+    }
+
+    .glass-morphism {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .glass-dark {
+      background: rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .gradient-primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+
+    .hover-scale {
+      transition: transform 0.3s ease;
+    }
+
+    .hover-scale:hover {
+      transform: scale(1.05);
+    }
+
+    .pulse-shadow {
+      animation: pulseShadow 2s infinite;
+    }
+
+    @keyframes pulseShadow {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    .search-results {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .modal-content {
+      animation: bounceIn 0.5s ease;
+    }
+
+    #map {
+      height: 400px;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    .dark-mode {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+      color: #e2e8f0;
+    }
+
+    .dark-mode .glass-morphism {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dark-mode .bg-white {
+      background-color: #1e293b !important;
+    }
+
+    .dark-mode .text-gray-800 {
+      color: #e2e8f0 !important;
+    }
+
+    .dark-mode .text-gray-700 {
+      color: #cbd5e1 !important;
+    }
+
+    .dark-mode .text-gray-600 {
+      color: #94a3b8 !important;
+    }
+
+    .dark-mode .border-gray-300 {
+      border-color: #475569 !important;
+    }
+
+    .accessibility-controls {
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .accessibility-controls .glass-morphism {
+      padding: 8px;
+      border-radius: 50px;
+    }
+
+    .accessibility-controls button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .floating-nav {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 80;
+    }
+
+    .high-contrast {
+      filter: contrast(150%) brightness(120%);
+      background-color: #000 !important;
+      color: #ffff00 !important;
+    }
+
+    .high-contrast * {
+      background-color: #000 !important;
+      color: #ffff00 !important;
+      border-color: #ffff00 !important;
+    }
+
+    .event-card {
+      transition: all 0.3s ease;
+      border-left: 4px solid var(--primary);
+    }
+
+    .event-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .emergency-card {
+      transition: all 0.3s ease;
+      border-left: 4px solid var(--danger);
+    }
+
+    .emergency-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(239, 68, 68, 0.2);
+    }
+
+    .loading-spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .notification {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      z-index: 1001;
+      transform: translateX(400px);
+      transition: transform 0.3s ease;
+      max-width: 300px;
+    }
+
+    .notification.show {
+      transform: translateX(0);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .stat-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 300px;
+      width: 100%;
+    }
+
+    .stars-rating {
+      display: flex;
+      gap: 2px;
+    }
+
+    .star {
+      color: #d1d5db;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .star:hover,
+    .star.active {
+      color: #fbbf24;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .preference-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-radius: 1rem;
+      padding: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .custom-toggle {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    .custom-toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 34px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--primary);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .counter-up {
+      animation: countUp 0.8s ease-out;
+    }
+
+    @keyframes countUp {
+      from {
+        transform: scale(0.8);
+        opacity: 0.7;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .activity-item {
+      animation: slideInRight 0.5s ease-out;
+    }
+
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .accessibility-controls {
+        top: 70px;
+        right: 10px;
+      }
+      
+      .accessibility-controls button {
+        width: 35px;
+        height: 35px;
+      }
+      
+      .notification {
+        top: 120px;
+        right: 10px;
+        max-width: 250px;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-blue-50">
+
+  <!-- Notification -->
+  <div id="notification" class="notification glass-morphism rounded-lg p-4">
+    <div class="flex items-center space-x-3">
+      <i id="notificationIcon" class="fas fa-info-circle text-blue-600"></i>
+      <div>
+        <p id="notificationTitle" class="font-semibold text-gray-800"></p>
+        <p id="notificationMessage" class="text-sm text-gray-600"></p>
+      </div>
+      <button onclick="hideNotification()" class="text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Onboarding Modal for New Users -->
+  <div id="onboardingModal" class="modal">
+    <div class="modal-content glass-morphism rounded-2xl p-6 max-w-lg w-full mx-4">
+      <div class="text-center mb-6">
+        <i class="fas fa-user-plus text-4xl text-green-600 mb-4"></i>
+        <h3 class="text-2xl font-bold text-gray-800 mb-2">Welcome to Accessible Thane!</h3>
+        <p class="text-gray-600">Let's set up your profile to personalize your experience</p>
+      </div>
+      <form id="onboardingForm" class="space-y-4">
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-2">Your Name</label>
+          <input type="text" id="onboardingName" required class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Enter your full name">
+        </div>
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-2">Email</label>
+          <input type="email" id="onboardingEmail" required class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Enter your email">
+        </div>
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-2">Phone Number</label>
+          <input type="tel" id="onboardingPhone" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" placeholder="Enter your phone number">
+        </div>
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-2">Accessibility Needs</label>
+          <textarea id="onboardingAccessibility" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" rows="3" placeholder="Describe any specific accessibility requirements..."></textarea>
+        </div>
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-2">Preferred Language</label>
+          <select id="onboardingLanguage" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="mr">Marathi</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full gradient-primary text-white py-3 rounded-xl font-medium hover-scale transition-all">
+          <i class="fas fa-check mr-2"></i>Complete Setup
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Review Modal -->
+  <div id="reviewModal" class="modal">
+    <div class="modal-content glass-morphism rounded-2xl p-6 max-w-lg w-full mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-800">
+          <i class="fas fa-star mr-2 text-yellow-500"></i>Rate & Review
+        </h3>
+        <button onclick="closeReviewModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <p class="font-medium text-gray-800 mb-2" id="reviewPlaceName">Place Name</p>
+          <div class="stars-rating mb-4">
+            <i class="star fas fa-star" data-rating="1"></i>
+            <i class="star fas fa-star" data-rating="2"></i>
+            <i class="star fas fa-star" data-rating="3"></i>
+            <i class="star fas fa-star" data-rating="4"></i>
+            <i class="star fas fa-star" data-rating="5"></i>
+          </div>
+        </div>
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-2">Your Review</label>
+          <textarea id="reviewText" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" rows="4" placeholder="Share your accessibility experience..."></textarea>
+        </div>
+        <div class="flex space-x-2">
+          <button onclick="submitReview()" class="flex-1 gradient-primary text-white py-3 px-4 rounded-xl font-medium hover-scale transition-all">
+            <i class="fas fa-paper-plane mr-2"></i>Submit Review
+          </button>
+          <button onclick="closeReviewModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 px-4 rounded-xl font-medium hover-scale transition-all">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Application -->
+  <div id="mainApp">
+    
+    <!-- Accessibility Controls -->
+    <div class="accessibility-controls">
+      <div class="glass-morphism">
+        <button onclick="increaseFontSize()" class="hover:bg-white hover:bg-opacity-30 transition-all" title="Increase font size">
+          <i class="fas fa-plus text-green-600"></i>
+        </button>
+      </div>
+      <div class="glass-morphism">
+        <button onclick="decreaseFontSize()" class="hover:bg-white hover:bg-opacity-30 transition-all" title="Decrease font size">
+          <i class="fas fa-minus text-green-600"></i>
+        </button>
+      </div>
+      <div class="glass-morphism">
+        <button onclick="toggleHighContrast()" class="hover:bg-white hover:bg-opacity-30 transition-all" title="High contrast">
+          <i class="fas fa-adjust text-green-600"></i>
+        </button>
+      </div>
+      <div class="glass-morphism">
+        <button onclick="toggleDarkMode()" class="hover:bg-white hover:bg-opacity-30 transition-all" title="Dark mode">
+          <i class="fas fa-moon text-green-600"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="glass-morphism sticky top-0 z-50 animate-slide-in">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-3">
+            <div class="animate-float">
+              <i class="fas fa-universal-access text-3xl text-green-600"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-800">Accessible Thane</h1>
+          </div>
+          
+          <div class="hidden md:flex space-x-6">
+            <button onclick="showTab('dashboard')" class="nav-btn text-green-600 border-b-2 border-green-600 px-3 py-2 font-medium">
+              <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+            </button>
+            <button onclick="showTab('map')" class="nav-btn text-gray-700 hover:text-green-600 px-3 py-2 font-medium transition-colors">
+              <i class="fas fa-map mr-2"></i>Map
+            </button>
+            <button onclick="showTab('search')" class="nav-btn text-gray-700 hover:text-green-600 px-3 py-2 font-medium transition-colors">
+              <i class="fas fa-search mr-2"></i>Search
+            </button>
+            <button onclick="showTab('events')" class="nav-btn text-gray-700 hover:text-green-600 px-3 py-2 font-medium transition-colors">
+              <i class="fas fa-calendar mr-2"></i>Events
+            </button>
+            <button onclick="showTab('emergency')" class="nav-btn text-gray-700 hover:text-green-600 px-3 py-2 font-medium transition-colors">
+              <i class="fas fa-phone mr-2"></i>Emergency
+            </button>
+            <button onclick="showTab('settings')" class="nav-btn text-gray-700 hover:text-green-600 px-3 py-2 font-medium transition-colors">
+              <i class="fas fa-cog mr-2"></i>Settings
+            </button>
+          </div>
+
+          <div class="flex items-center space-x-4">
+            <button onclick="showProfile()" class="flex items-center space-x-2 text-gray-700 hover:text-green-600 transition-colors">
+              <i class="fas fa-user-circle text-xl"></i>
+              <span id="userName" class="hidden md:inline">User</span>
+            </button>
+            <button onclick="logout()" class="text-gray-700 hover:text-red-600 transition-colors" title="Logout">
+              <i class="fas fa-sign-out-alt"></i>
+            </button>
+            <button class="md:hidden p-2" onclick="toggleMobileMenu()">
+              <i class="fas fa-bars text-gray-700"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden glass-morphism animate-slide-in">
+      <div class="px-4 py-2 space-y-2">
+        <button onclick="showTab('dashboard')" class="block w-full text-left px-3 py-2 text-green-600 font-medium">
+          <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+        </button>
+        <button onclick="showTab('map')" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600">
+          <i class="fas fa-map mr-2"></i>Map
+        </button>
+        <button onclick="showTab('search')" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600">
+          <i class="fas fa-search mr-2"></i>Search
+        </button>
+        <button onclick="showTab('events')" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600">
+          <i class="fas fa-calendar mr-2"></i>Events
+        </button>
+        <button onclick="showTab('emergency')" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600">
+          <i class="fas fa-phone mr-2"></i>Emergency
+        </button>
+        <button onclick="showTab('settings')" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600">
+          <i class="fas fa-cog mr-2"></i>Settings
+        </button>
+        <button onclick="showProfile()" class="block w-full text-left px-3 py-2 text-gray-700 hover:text-green-600">
+          <i class="fas fa-user mr-2"></i>Profile
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-6">
+      
+      <!-- Dashboard Tab -->
+      <div id="dashboardTab" class="tab-content active">
+        <div class="animate-fade-in">
+          <div class="mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-2">Welcome, <span id="dashboardUserName">User</span>!</h2>
+            <p class="text-gray-600">Here's your accessibility activity overview</p>
+            <div class="mt-4">
+              <button onclick="simulateActivity()" class="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-3 rounded-xl font-medium hover-scale transition-all">
+                <i class="fas fa-chart-line mr-2"></i>Simulate Activity & Update Charts
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="stat-card text-center">
+              <i class="fas fa-map-marker-alt text-3xl text-green-600 mb-3"></i>
+              <h3 class="text-2xl font-bold text-gray-800 counter-up" id="placesVisited">0</h3>
+              <p class="text-gray-600">Places Visited</p>
+              <button onclick="incrementPlacesVisited()" class="mt-2 bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm hover:bg-green-200 transition-colors">
+                <i class="fas fa-plus mr-1"></i>Visit Place
+              </button>
+            </div>
+            <div class="stat-card text-center">
+              <i class="fas fa-star text-3xl text-yellow-500 mb-3"></i>
+              <h3 class="text-2xl font-bold text-gray-800 counter-up" id="reviewsGiven">0</h3>
+              <p class="text-gray-600">Reviews Given</p>
+              <button onclick="openReviewModal('Sample Place')" class="mt-2 bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm hover:bg-yellow-200 transition-colors">
+                <i class="fas fa-star mr-1"></i>Write Review
+              </button>
+            </div>
+            <div class="stat-card text-center">
+              <i class="fas fa-calendar-check text-3xl text-blue-600 mb-3"></i>
+              <h3 class="text-2xl font-bold text-gray-800 counter-up" id="eventsAttended">0</h3>
+              <p class="text-gray-600">Events Attended</p>
+              <button onclick="incrementEventsAttended()" class="mt-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm hover:bg-blue-200 transition-colors">
+                <i class="fas fa-calendar mr-1"></i>Join Event
+              </button>
+            </div>
+          </div>
+
+          <!-- Activity Charts -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="stat-card">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-chart-line mr-2 text-green-600"></i>Monthly Activity
+                <button onclick="updateActivityChart()" class="float-right bg-green-100 text-green-700 px-2 py-1 rounded text-xs hover:bg-green-200 transition-colors">
+                  <i class="fas fa-sync-alt mr-1"></i>Update
+                </button>
+              </h3>
+              <div class="chart-container" style="height: 300px;">
+                <canvas id="activityChart"></canvas>
+              </div>
+            </div>
+            <div class="stat-card">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-chart-pie mr-2 text-blue-600"></i>Places by Category
+                <button onclick="updateCategoryChart()" class="float-right bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs hover:bg-blue-200 transition-colors">
+                  <i class="fas fa-sync-alt mr-1"></i>Update
+                </button>
+              </h3>
+              <div class="chart-container" style="height: 300px;">
+                <canvas id="categoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Real-time Activity Feed -->
+          <div class="stat-card mb-8">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">
+              <i class="fas fa-clock mr-2 text-purple-600"></i>Recent Activities
+              <span class="float-right bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs" id="activityCount">0 activities</span>
+            </h3>
+            <div id="recentActivity" class="space-y-4 max-h-80 overflow-y-auto">
+              <div class="text-center text-gray-500 py-8">
+                <i class="fas fa-history text-4xl mb-4"></i>
+                <p>No recent activity yet. Start exploring accessible places!</p>
+                <button onclick="showTab('search')" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                  Find Places
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Progress Section -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+            <div class="stat-card">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-trophy mr-2 text-yellow-600"></i>Achievement Progress
+              </h3>
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Explorer Badge</span>
+                    <span class="text-sm text-gray-500" id="explorerProgress">0/10 places</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-green-600 h-2 rounded-full transition-all duration-500" id="explorerBar" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Reviewer Badge</span>
+                    <span class="text-sm text-gray-500" id="reviewerProgress">0/5 reviews</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-yellow-500 h-2 rounded-full transition-all duration-500" id="reviewerBar" style="width: 0%"></div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-medium text-gray-700">Community Member</span>
+                    <span class="text-sm text-gray-500" id="communityProgress">0/3 events</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-blue-600 h-2 rounded-full transition-all duration-500" id="communityBar" style="width: 0%"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="stat-card">
+              <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                <i class="fas fa-user mr-2 text-indigo-600"></i>Profile Summary
+              </h3>
+              <div class="space-y-3">
+                <div>
+                  <p class="text-sm text-gray-600">Name</p>
+                  <p class="font-medium text-gray-800" id="profileName">Not set</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-600">Email</p>
+                  <p class="font-medium text-gray-800" id="profileEmail">Not set</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-600">Member since</p>
+                  <p class="font-medium text-gray-800" id="memberSince">Today</p>
+                </div>
+                <div>
+                  <p class="text-sm text-gray-600">Accessibility Score</p>
+                  <div class="flex items-center space-x-2">
+                    <div class="flex-1 bg-gray-200 rounded-full h-2">
+                      <div class="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500" id="accessibilityScore" style="width: 0%"></div>
+                    </div>
+                    <span class="text-sm font-semibold text-green-600" id="scoreText">0%</span>
+                  </div>
+                </div>
+                <button onclick="showProfile()" class="w-full bg-indigo-600 text-white py-2 rounded-lg hover:bg-indigo-700 transition-colors">
+                  Edit Profile
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map Tab -->
+      <div id="mapTab" class="tab-content">
+        <div class="animate-fade-in">
+          
+          <!-- Filter Buttons -->
+          <div class="mb-6">
+            <div class="glass-morphism rounded-2xl p-4">
+              <h3 class="text-lg font-semibold mb-3 text-gray-800">
+                <i class="fas fa-filter mr-2 text-green-600"></i>Filter Places
+              </h3>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="filterMarkers('all')" class="filter-btn bg-green-600 text-white px-4 py-2 rounded-full hover-scale transition-all font-medium">
+                  <i class="fas fa-globe mr-2"></i>All Places
+                </button>
+                <button onclick="filterMarkers('hospital')" class="filter-btn bg-red-100 text-red-600 px-4 py-2 rounded-full hover-scale transition-all">
+                  <i class="fas fa-hospital mr-2"></i>Hospitals
+                </button>
+                <button onclick="filterMarkers('mall')" class="filter-btn bg-purple-100 text-purple-600 px-4 py-2 rounded-full hover-scale transition-all">
+                  <i class="fas fa-shopping-bag mr-2"></i>Malls
+                </button>
+                <button onclick="filterMarkers('transport')" class="filter-btn bg-blue-100 text-blue-600 px-4 py-2 rounded-full hover-scale transition-all">
+                  <i class="fas fa-bus mr-2"></i>Transport
+                </button>
+                <button onclick="filterMarkers('restaurant')" class="filter-btn bg-yellow-100 text-yellow-600 px-4 py-2 rounded-full hover-scale transition-all">
+                  <i class="fas fa-utensils mr-2"></i>Restaurants
+                </button>
+                <button onclick="filterMarkers('school')" class="filter-btn bg-indigo-100 text-indigo-600 px-4 py-2 rounded-full hover-scale transition-all">
+                  <i class="fas fa-school mr-2"></i>Schools
+                </button>
+                <button onclick="filterMarkers('park')" class="filter-btn bg-green-100 text-green-600 px-4 py-2 rounded-full hover-scale transition-all">
+                  <i class="fas fa-tree mr-2"></i>Parks
+                </button>
+                <button onclick="filterMarkers('temple')" class="filter-btn bg-orange-100 text-orange-600 px-4 py-2 rounded-full hover-scale transition-all">
+                  <i class="fas fa-place-of-worship mr-2"></i>Temples
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Map Container -->
+          <div class="glass-morphism rounded-2xl p-6 animate-bounce-in">
+            <div id="map"></div>
+          </div>
+
+          <!-- Statistics Cards -->
+          <div class="grid md:grid-cols-4 gap-4 mt-6">
+            <div class="glass-morphism rounded-xl p-4 text-center hover-scale">
+              <i class="fas fa-wheelchair text-3xl text-green-600 mb-2"></i>
+              <h4 class="font-semibold text-gray-800">85%</h4>
+              <p class="text-sm text-gray-600">Accessible Places</p>
+            </div>
+            <div class="glass-morphism rounded-xl p-4 text-center hover-scale">
+              <i class="fas fa-users text-3xl text-blue-600 mb-2"></i>
+              <h4 class="font-semibold text-gray-800" id="usersHelped">1,200+</h4>
+              <p class="text-sm text-gray-600">Users Helped</p>
+            </div>
+            <div class="glass-morphism rounded-xl p-4 text-center hover-scale">
+              <i class="fas fa-star text-3xl text-yellow-600 mb-2"></i>
+              <h4 class="font-semibold text-gray-800" id="avgPlaceRating">4.8/5</h4>
+              <p class="text-sm text-gray-600">Average Rating</p>
+            </div>
+            <div class="glass-morphism rounded-xl p-4 text-center hover-scale">
+              <i class="fas fa-map-marker-alt text-3xl text-purple-600 mb-2"></i>
+              <h4 class="font-semibold text-gray-800" id="locationsMapped">35+</h4>
+              <p class="text-sm text-gray-600">Locations Mapped</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Tab -->
+      <div id="searchTab" class="tab-content">
+        <div class="animate-fade-in">
+          <div class="glass-morphism rounded-2xl p-6">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">
+              <i class="fas fa-search mr-3 text-green-600"></i>Search Places
+            </h2>
+            
+            <div class="relative mb-6">
+              <input type="text" id="searchInput" placeholder="Search for accessible places in Thane..." 
+                     class="w-full px-4 py-3 pl-12 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+              <i class="fas fa-search absolute left-4 top-4 text-gray-400"></i>
+            </div>
+
+            <div id="searchResults" class="search-results space-y-4"></div>
+
+            <!-- Popular Searches -->
+            <div class="mt-8">
+              <h3 class="text-lg font-semibold mb-4 text-gray-800">Popular Searches</h3>
+              <div class="flex flex-wrap gap-2">
+                <button onclick="searchPlace('Jupiter Hospital')" class="bg-green-100 text-green-700 px-4 py-2 rounded-full hover-scale transition-all">
+                  Jupiter Hospital
+                </button>
+                <button onclick="searchPlace('Viviana Mall')" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-full hover-scale transition-all">
+                  Viviana Mall
+                </button>
+                <button onclick="searchPlace('Thane Station')" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-full hover-scale transition-all">
+                  Thane Station
+                </button>
+                <button onclick="searchPlace('Upvan Lake')" class="bg-green-100 text-green-700 px-4 py-2 rounded-full hover-scale transition-all">
+                  Upvan Lake
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Events Tab -->
+      <div id="eventsTab" class="tab-content">
+        <div class="animate-fade-in">
+          <div class="glass-morphism rounded-2xl p-6">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">
+              <i class="fas fa-calendar-alt mr-3 text-green-600"></i>Accessibility Events
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="event-card glass-morphism rounded-xl p-6 hover-scale">
+                <div class="flex items-start space-x-4">
+                  <div class="bg-green-100 rounded-full p-3">
+                    <i class="fas fa-wheelchair text-green-600 text-xl"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-800 mb-2">Accessibility Awareness Week</h3>
+                    <p class="text-gray-600 text-sm mb-3">Join us for a week-long series of events promoting accessibility in Thane</p>
+                    <div class="flex items-center text-sm text-gray-500">
+                      <i class="fas fa-calendar mr-2"></i>Dec 15-22, 2024
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500 mt-1">
+                      <i class="fas fa-map-marker-alt mr-2"></i>Viviana Mall, Thane
+                    </div>
+                    <button onclick="registerForEvent('Accessibility Awareness Week')" class="mt-3 bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition-colors">
+                      Register Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="event-card glass-morphism rounded-xl p-6 hover-scale">
+                <div class="flex items-start space-x-4">
+                  <div class="bg-blue-100 rounded-full p-3">
+                    <i class="fas fa-users text-blue-600 text-xl"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-800 mb-2">Inclusive Transport Workshop</h3>
+                    <p class="text-gray-600 text-sm mb-3">Learn about accessible transportation options in Thane</p>
+                    <div class="flex items-center text-sm text-gray-500">
+                      <i class="fas fa-calendar mr-2"></i>Jan 10, 2025
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500 mt-1">
+                      <i class="fas fa-map-marker-alt mr-2"></i>Thane Railway Station
+                    </div>
+                    <button onclick="registerForEvent('Inclusive Transport Workshop')" class="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition-colors">
+                      Register Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="event-card glass-morphism rounded-xl p-6 hover-scale">
+                <div class="flex items-start space-x-4">
+                  <div class="bg-purple-100 rounded-full p-3">
+                    <i class="fas fa-hospital text-purple-600 text-xl"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-800 mb-2">Healthcare Accessibility Fair</h3>
+                    <p class="text-gray-600 text-sm mb-3">Free health checkups and accessibility consultations</p>
+                    <div class="flex items-center text-sm text-gray-500">
+                      <i class="fas fa-calendar mr-2"></i>Jan 25, 2025
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500 mt-1">
+                      <i class="fas fa-map-marker-alt mr-2"></i>Jupiter Hospital
+                    </div>
+                    <button onclick="registerForEvent('Healthcare Accessibility Fair')" class="mt-3 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition-colors">
+                      Register Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="event-card glass-morphism rounded-xl p-6 hover-scale">
+                <div class="flex items-start space-x-4">
+                  <div class="bg-yellow-100 rounded-full p-3">
+                    <i class="fas fa-graduation-cap text-yellow-600 text-xl"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-800 mb-2">Digital Accessibility Training</h3>
+                    <p class="text-gray-600 text-sm mb-3">Learn to use assistive technologies and apps</p>
+                    <div class="flex items-center text-sm text-gray-500">
+                      <i class="fas fa-calendar mr-2"></i>Feb 5, 2025
+                    </div>
+                    <div class="flex items-center text-sm text-gray-500 mt-1">
+                      <i class="fas fa-map-marker-alt mr-2"></i>Korum Mall, Thane
+                    </div>
+                    <button onclick="registerForEvent('Digital Accessibility Training')" class="mt-3 bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-700 transition-colors">
+                      Register Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Emergency Tab -->
+      <div id="emergencyTab" class="tab-content">
+        <div class="animate-fade-in">
+          <div class="glass-morphism rounded-2xl p-6">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">
+              <i class="fas fa-phone-alt mr-3 text-red-600"></i>Emergency Contacts
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+              <div class="emergency-card glass-morphism rounded-xl p-6">
+                <div class="flex items-center space-x-4 mb-4">
+                  <div class="bg-red-100 rounded-full p-3 pulse-shadow">
+                    <i class="fas fa-ambulance text-red-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-gray-800">Emergency Medical</h3>
+                    <p class="text-sm text-gray-600">24/7 Ambulance Service</p>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <a href="tel:108" class="flex items-center justify-between bg-red-50 p-3 rounded-lg hover:bg-red-100 transition-all">
+                    <span class="font-medium text-red-700">Emergency Ambulance</span>
+                    <span class="text-red-600 font-bold">108</span>
+                  </a>
+                  <a href="tel:+912225446781" class="flex items-center justify-between bg-red-50 p-3 rounded-lg hover:bg-red-100 transition-all">
+                    <span class="font-medium text-red-700">Jupiter Hospital</span>
+                    <span class="text-red-600 font-bold">022-2544-6781</span>
+                  </a>
+                </div>
+              </div>
+
+              <div class="emergency-card glass-morphism rounded-xl p-6">
+                <div class="flex items-center space-x-4 mb-4">
+                  <div class="bg-blue-100 rounded-full p-3">
+                    <i class="fas fa-shield-alt text-blue-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-gray-800">Police & Safety</h3>
+                    <p class="text-sm text-gray-600">Emergency Police Services</p>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <a href="tel:100" class="flex items-center justify-between bg-blue-50 p-3 rounded-lg hover:bg-blue-100 transition-all">
+                    <span class="font-medium text-blue-700">Police Emergency</span>
+                    <span class="text-blue-600 font-bold">100</span>
+                  </a>
+                  <a href="tel:+912225446745" class="flex items-center justify-between bg-blue-50 p-3 rounded-lg hover:bg-blue-100 transition-all">
+                    <span class="font-medium text-blue-700">Thane Police Station</span>
+                    <span class="text-blue-600 font-bold">022-2544-6745</span>
+                  </a>
+                </div>
+              </div>
+
+              <div class="emergency-card glass-morphism rounded-xl p-6">
+                <div class="flex items-center space-x-4 mb-4">
+                  <div class="bg-orange-100 rounded-full p-3">
+                    <i class="fas fa-fire text-orange-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-gray-800">Fire Department</h3>
+                    <p class="text-sm text-gray-600">Fire Emergency Services</p>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <a href="tel:101" class="flex items-center justify-between bg-orange-50 p-3 rounded-lg hover:bg-orange-100 transition-all">
+                    <span class="font-medium text-orange-700">Fire Emergency</span>
+                    <span class="text-orange-600 font-bold">101</span>
+                  </a>
+                  <a href="tel:+912225446732" class="flex items-center justify-between bg-orange-50 p-3 rounded-lg hover:bg-orange-100 transition-all">
+                    <span class="font-medium text-orange-700">Thane Fire Station</span>
+                    <span class="text-orange-600 font-bold">022-2544-6732</span>
+                  </a>
+                </div>
+              </div>
+
+              <div class="emergency-card glass-morphism rounded-xl p-6">
+                <div class="flex items-center space-x-4 mb-4">
+                  <div class="bg-green-100 rounded-full p-3">
+                    <i class="fas fa-hands-helping text-green-600 text-xl"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-gray-800">Accessibility Support</h3>
+                    <p class="text-sm text-gray-600">24/7 Assistance Helpline</p>
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <a href="tel:1800-123-4567" class="flex items-center justify-between bg-green-50 p-3 rounded-lg hover:bg-green-100 transition-all">
+                    <span class="font-medium text-green-700">Accessibility Helpline</span>
+                    <span class="text-green-600 font-bold">1800-123-4567</span>
+                  </a>
+                  <a href="tel:+912225446789" class="flex items-center justify-between bg-green-50 p-3 rounded-lg hover:bg-green-100 transition-all">
+                    <span class="font-medium text-green-700">Disability Services</span>
+                    <span class="text-green-600 font-bold">022-2544-6789</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-8 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+              <div class="flex">
+                <div class="flex-shrink-0">
+                  <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                </div>
+                <div class="ml-3">
+                  <p class="text-sm text-yellow-700">
+                    <strong>Important:</strong> In case of emergency, always call the primary emergency numbers (108, 100, 101) first. 
+                    These services are equipped to handle accessibility needs.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Tab -->
+      <div id="settingsTab" class="tab-content">
+        <div class="animate-fade-in">
+          <div class="glass-morphism rounded-2xl p-6">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">
+              <i class="fas fa-cog mr-3 text-green-600"></i>Settings & Preferences
+            </h2>
+
+            <div class="settings-grid">
+              <!-- Profile Settings -->
+              <div class="preference-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                  <i class="fas fa-user mr-2 text-indigo-600"></i>Profile Settings
+                </h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Display Name</label>
+                    <input type="text" id="settingsName" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                  </div>
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Email</label>
+                    <input type="email" id="settingsEmail" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                  </div>
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Phone</label>
+                    <input type="tel" id="settingsPhone" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Accessibility Settings -->
+              <div class="preference-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                  <i class="fas fa-universal-access mr-2 text-green-600"></i>Accessibility
+                </h3>
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">High Contrast Mode</span>
+                    <label class="custom-toggle">
+                      <input type="checkbox" id="highContrastToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Large Text</span>
+                    <label class="custom-toggle">
+                      <input type="checkbox" id="largeTextToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Screen Reader Support</span>
+                    <label class="custom-toggle">
+                      <input type="checkbox" id="screenReaderToggle">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Font Size</label>
+                    <input type="range" id="fontSizeSlider" min="12" max="24" value="16" class="w-full">
+                    <div class="flex justify-between text-xs text-gray-500">
+                      <span>Small</span>
+                      <span>Large</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Notification Settings -->
+              <div class="preference-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                  <i class="fas fa-bell mr-2 text-yellow-600"></i>Notifications
+                </h3>
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Event Reminders</span>
+                    <label class="custom-toggle">
+                      <input type="checkbox" id="eventNotifications" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">New Places</span>
+                    <label class="custom-toggle">
+                      <input type="checkbox" id="placeNotifications" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Emergency Alerts</span>
+                    <label class="custom-toggle">
+                      <input type="checkbox" id="emergencyNotifications" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Privacy Settings -->
+              <div class="preference-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                  <i class="fas fa-shield-alt mr-2 text-blue-600"></i>Privacy
+                </h3>
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Share Location</span>
+                    <label class="custom-toggle">
+                      <input type="checkbox" id="locationSharing" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Activity Tracking</span>
+                    <label class="custom-toggle">
+                      <input type="checkbox" id="activityTracking" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span class="text-gray-700">Public Profile</span>
+                    <label class="custom-toggle">
+                      <input type="checkbox" id="publicProfile">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Language Settings -->
+              <div class="preference-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                  <i class="fas fa-language mr-2 text-purple-600"></i>Language
+                </h3>
+                <div class="space-y-4">
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Preferred Language</label>
+                    <select id="languageSelect" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                      <option value="en">English</option>
+                      <option value="hi">Hindi</option>
+                      <option value="mr">Marathi</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Date Format</label>
+                    <select id="dateFormatSelect" class="w-full px-3 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                      <option value="dd/mm/yyyy">DD/MM/YYYY</option>
+                      <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                      <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Data Management -->
+              <div class="preference-card">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                  <i class="fas fa-database mr-2 text-red-600"></i>Data Management
+                </h3>
+                <div class="space-y-4">
+                  <button onclick="exportData()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-download mr-2"></i>Export My Data
+                  </button>
+                  <button onclick="clearData()" class="w-full bg-yellow-600 text-white py-2 rounded-lg hover:bg-yellow-700 transition-colors">
+                    <i class="fas fa-trash mr-2"></i>Clear Activity Data
+                  </button>
+                  <button onclick="deleteAccount()" class="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
+                    <i class="fas fa-user-times mr-2"></i>Delete Account
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 text-center">
+              <button onclick="saveSettings()" class="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium">
+                <i class="fas fa-save mr-2"></i>Save All Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Floating Navigation -->
+    <div class="floating-nav">
+      <button id="backToTop" onclick="scrollToTop()" class="bg-green-600 text-white p-3 rounded-full shadow-lg hover-scale pulse-shadow transition-all mb-3 hidden">
+        <i class="fas fa-arrow-up"></i>
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Profile Modal -->
+  <div id="profileModal" class="modal">
+    <div class="modal-content glass-morphism rounded-2xl p-6 max-w-lg w-full mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-800">
+          <i class="fas fa-user mr-2 text-indigo-600"></i>User Profile
+        </h3>
+        <button onclick="closeProfileModal()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-2">Full Name</label>
+          <input type="text" id="profileNameInput" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+        </div>
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-2">Email</label>
+          <input type="email" id="profileEmailInput" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+        </div>
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-2">Phone Number</label>
+          <input type="tel" id="profilePhoneInput" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all">
+        </div>
+        <div>
+          <label class="block text-gray-700 text-sm font-medium mb-2">Accessibility Needs</label>
+          <textarea id="accessibilityNeeds" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all" rows="3" placeholder="Describe any specific accessibility requirements..."></textarea>
+        </div>
+        <div class="flex space-x-2">
+          <button onclick="saveProfile()" class="flex-1 gradient-primary text-white py-3 px-4 rounded-xl font-medium hover-scale transition-all">
+            <i class="fas fa-save mr-2"></i>Save Changes
+          </button>
+          <button onclick="closeProfileModal()" class="flex-1 bg-gray-300 text-gray-700 py-3 px-4 rounded-xl font-medium hover-scale transition-all">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // Global variables
+    let userData = {};
+    let userStats = {
+      placesVisited: 0,
+      reviewsGiven: 0,
+      eventsAttended: 0,
+      totalReviews: 0,
+      avgRating: 0.0,
+      helpfulVotes: 0,
+      activities: []
+    };
+    
+    let map;
+    let markers = [];
+    let currentFontSize = 16;
+    let activityChart, categoryChart;
+    let currentRating = 0;
+    let currentPlace = '';
+
+    // Enhanced chart data
+    let chartData = {
+      monthlyActivity: {
+        places: [2, 4, 1, 3, 5, 2],
+        reviews: [1, 2, 0, 1, 3, 1],
+        events: [0, 1, 0, 0, 2, 1]
+      },
+      categories: {
+        hospitals: 35,
+        malls: 25,
+        transport: 20,
+        restaurants: 12,
+        parks: 8
+      }
+    };
+
+    // Places data
+    const places = [
+      {
+        name: 'Jupiter Hospital',
+        category: 'hospital',
+        lat: 19.2183,
+        lng: 72.9781,
+        rating: 4.5,
+        accessibility: 'Excellent wheelchair access, dedicated parking, accessible restrooms',
+        reviews: 245
+      },
+      {
+        name: 'Viviana Mall',
+        category: 'mall',
+        lat: 19.2228,
+        lng: 72.9694,
+        rating: 4.3,
+        accessibility: 'Wheelchair accessible, elevators, accessible parking available',
+        reviews: 189
+      },
+      {
+        name: 'Thane Railway Station',
+        category: 'transport',
+        lat: 19.1872,
+        lng: 72.9781,
+        rating: 3.8,
+        accessibility: 'Ramps available, accessible platforms, special assistance counter',
+        reviews: 432
+      },
+      {
+        name: 'Upvan Lake',
+        category: 'park',
+        lat: 19.2156,
+        lng: 72.9719,
+        rating: 4.2,
+        accessibility: 'Paved walking paths, accessible viewing areas',
+        reviews: 178
+      },
+      {
+        name: 'Korum Mall',
+        category: 'mall',
+        lat: 19.2194,
+        lng: 72.9775,
+        rating: 4.4,
+        accessibility: 'Full wheelchair access, tactile pathways, accessible restrooms',
+        reviews: 203
+      },
+      {
+        name: 'McDonald\'s Thane',
+        category: 'restaurant',
+        lat: 19.2228,
+        lng: 72.9694,
+        rating: 4.1,
+        accessibility: 'Wheelchair accessible entrance, accessible seating area',
+        reviews: 156
+      }
+    ];
+
+    // Initialize application
+    document.addEventListener('DOMContentLoaded', function() {
+      checkUserData();
+      initializeCharts();
+      initializeMap();
+      loadUserPreferences();
+      
+      // Add event listeners
+      document.getElementById('searchInput').addEventListener('input', handleSearch);
+      
+      // Star rating functionality
+      document.querySelectorAll('.star').forEach(star => {
+        star.addEventListener('click', function() {
+          const rating = parseInt(this.dataset.rating);
+          setRating(rating);
+        });
+        
+        star.addEventListener('mouseover', function() {
+          const rating = parseInt(this.dataset.rating);
+          highlightStars(rating);
+        });
+      });
+      
+      document.querySelector('.stars-rating').addEventListener('mouseleave', function() {
+        highlightStars(currentRating);
+      });
+      
+      // Check if user came from login
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('user')) {
+        const userInfo = JSON.parse(decodeURIComponent(urlParams.get('user')));
+        userData = userInfo;
+        updateUserInterface();
+        saveUserData();
+      }
+    });
+
+    // Enhanced user data checking
+    function checkUserData() {
+      const savedUserData = localStorage.getItem('accessibleThaneUser');
+      const savedUserStats = localStorage.getItem('accessibleThaneStats');
+      
+      if (savedUserData) {
+        userData = JSON.parse(savedUserData);
+        updateUserInterface();
+      } else {
+        // Show onboarding modal for new users
+        document.getElementById('onboardingModal').classList.add('show');
+      }
+
+      if (savedUserStats) {
+        userStats = JSON.parse(savedUserStats);
+        updateStats();
+        updateProgressBars();
+      }
+
+      // Set up onboarding form
+      document.getElementById('onboardingForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        handleOnboarding();
+      });
+    }
+
+    // Enhanced onboarding with initial data
+    function handleOnboarding() {
+      userData = {
+        name: document.getElementById('onboardingName').value,
+        email: document.getElementById('onboardingEmail').value,
+        phone: document.getElementById('onboardingPhone').value,
+        accessibilityNeeds: document.getElementById('onboardingAccessibility').value,
+        language: document.getElementById('onboardingLanguage').value,
+        joinDate: new Date().toISOString(),
+        preferences: {
+          notifications: true,
+          locationSharing: true,
+          darkMode: false,
+          highContrast: false
+        }
+      };
+
+      // Initialize with some sample data
+      userStats = {
+        placesVisited: Math.floor(Math.random() * 5) + 1,
+        reviewsGiven: Math.floor(Math.random() * 3) + 1,
+        eventsAttended: Math.floor(Math.random() * 2),
+        totalReviews: Math.floor(Math.random() * 5) + 1,
+        avgRating: (Math.random() * 2 + 3).toFixed(1),
+        helpfulVotes: Math.floor(Math.random() * 10),
+        activities: []
+      };
+
+      // Add initial activities
+      addActivity('Joined Accessible Thane!', 'welcome', 'Just now');
+      
+      saveUserData();
+      updateUserInterface();
+      updateStats();
+      updateProgressBars();
+      updateCharts();
+      
+      document.getElementById('onboardingModal').classList.remove('show');
+      
+      showNotification('Welcome!', `Welcome to Accessible Thane, ${userData.name}!`, 'success');
+      
+      // Update charts with initial data
+      setTimeout(() => {
+        updateActivityChart();
+        updateCategoryChart();
+      }, 1000);
+    }
+
+    // Enhanced user interface updates
+    function updateUserInterface() {
+      if (userData.name) {
+        document.getElementById('userName').textContent = userData.name.split(' ')[0];
+        document.getElementById('dashboardUserName').textContent = userData.name.split(' ')[0];
+        document.getElementById('profileName').textContent = userData.name;
+        document.getElementById('profileNameInput').value = userData.name;
+      }
+      
+      if (userData.email) {
+        document.getElementById('profileEmail').textContent = userData.email;
+        document.getElementById('profileEmailInput').value = userData.email;
+      }
+      
+      if (userData.phone) {
+        document.getElementById('profilePhoneInput').value = userData.phone;
+      }
+      
+      if (userData.accessibilityNeeds) {
+        document.getElementById('accessibilityNeeds').value = userData.accessibilityNeeds;
+      }
+      
+      if (userData.joinDate) {
+        const joinDate = new Date(userData.joinDate);
+        document.getElementById('memberSince').textContent = joinDate.toLocaleDateString('en-US', { 
+          month: 'long', 
+          year: 'numeric' 
+        });
+      }
+
+      // Update settings form
+      if (userData.name) document.getElementById('settingsName').value = userData.name;
+      if (userData.email) document.getElementById('settingsEmail').value = userData.email;
+      if (userData.phone) document.getElementById('settingsPhone').value = userData.phone;
+    }
+
+    // Enhanced statistics updates with animations
+    function updateStats() {
+      animateValue('placesVisited', 0, userStats.placesVisited, 1000);
+      animateValue('reviewsGiven', 0, userStats.reviewsGiven, 1200);
+      animateValue('eventsAttended', 0, userStats.eventsAttended, 1400);
+      
+      document.getElementById('totalReviews').textContent = userStats.totalReviews;
+      document.getElementById('avgRating').textContent = userStats.avgRating;
+      document.getElementById('helpfulVotes').textContent = userStats.helpfulVotes;
+
+      updateRecentActivity();
+      updateProgressBars();
+      calculateAccessibilityScore();
+    }
+
+    // Animation for counting up numbers
+    function animateValue(id, start, end, duration) {
+      const element = document.getElementById(id);
+      if (!element) return;
+      
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const current = Math.floor(progress * (end - start) + start);
+        element.textContent = current;
+        element.classList.add('counter-up');
+        
+        if (progress < 1) {
+          window.requestAnimationFrame(step);
+        }
+      };
+      window.requestAnimationFrame(step);
+    }
+
+    // Update progress bars for achievements
+    function updateProgressBars() {
+      // Explorer badge (places visited)
+      const explorerProgress = Math.min(userStats.placesVisited, 10);
+      document.getElementById('explorerProgress').textContent = `${userStats.placesVisited}/10 places`;
+      document.getElementById('explorerBar').style.width = `${(explorerProgress / 10) * 100}%`;
+      
+      // Reviewer badge (reviews given)
+      const reviewerProgress = Math.min(userStats.reviewsGiven, 5);
+      document.getElementById('reviewerProgress').textContent = `${userStats.reviewsGiven}/5 reviews`;
+      document.getElementById('reviewerBar').style.width = `${(reviewerProgress / 5) * 100}%`;
+      
+      // Community member (events attended)
+      const communityProgress = Math.min(userStats.eventsAttended, 3);
+      document.getElementById('communityProgress').textContent = `${userStats.eventsAttended}/3 events`;
+      document.getElementById('communityBar').style.width = `${(communityProgress / 3) * 100}%`;
+    }
+
+    // Calculate and display accessibility score
+    function calculateAccessibilityScore() {
+      const score = Math.min(
+        ((userStats.placesVisited * 10) + 
+         (userStats.reviewsGiven * 15) + 
+         (userStats.eventsAttended * 20)) / 2, 
+        100
+      );
+      
+      document.getElementById('accessibilityScore').style.width = `${score}%`;
+      document.getElementById('scoreText').textContent = `${Math.round(score)}%`;
+    }
+
+    // Enhanced recent activity with real-time updates
+    function updateRecentActivity() {
+      const activityContainer = document.getElementById('recentActivity');
+      const activityCount = document.getElementById('activityCount');
+      
+      if (!userStats.activities || userStats.activities.length === 0) {
+        activityContainer.innerHTML = `
+          <div class="text-center text-gray-500 py-8">
+            <i class="fas fa-history text-4xl mb-4"></i>
+            <p>No recent activity yet. Start exploring accessible places!</p>
+            <button onclick="showTab('search')" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors">
+              Find Places
+            </button>
+          </div>
+        `;
+        activityCount.textContent = '0 activities';
+        return;
+      }
+
+      activityCount.textContent = `${userStats.activities.length} activities`;
+      
+      activityContainer.innerHTML = userStats.activities
+        .slice(0, 10) // Show last 10 activities
+        .map((activity, index) => `
+          <div class="activity-item flex items-center space-x-4 p-3 bg-gray-50 rounded-lg" style="animation-delay: ${index * 0.1}s">
+            <div class="bg-${activity.color}-100 p-2 rounded-full">
+              <i class="${activity.icon} text-${activity.color}-600"></i>
+            </div>
+            <div class="flex-1">
+              <p class="font-medium text-gray-800">${activity.title}</p>
+              <p class="text-sm text-gray-600">${activity.time}</p>
+            </div>
+            ${activity.rating ? `
+              <div class="flex text-yellow-400">
+                ${Array(activity.rating).fill('<i class="fas fa-star text-xs"></i>').join('')}
+              </div>
+            ` : ''}
+          </div>
+        `).join('');
+    }
+
+    // Add new activity to the feed
+    function addActivity(title, type, time = 'Just now', rating = null) {
+      const icons = {
+        visit: 'fas fa-map-marker-alt',
+        review: 'fas fa-star',
+        event: 'fas fa-calendar',
+        welcome: 'fas fa-user-plus'
+      };
+      
+      const colors = {
+        visit: 'blue',
+        review: 'green',
+        event: 'purple',
+        welcome: 'indigo'
+      };
+      
+      const activity = {
+        title,
+        icon: icons[type] || 'fas fa-circle',
+        color: colors[type] || 'gray',
+        time,
+        rating
+      };
+      
+      if (!userStats.activities) {
+        userStats.activities = [];
+      }
+      
+      userStats.activities.unshift(activity);
+      
+      // Keep only last 50 activities
+      if (userStats.activities.length > 50) {
+        userStats.activities = userStats.activities.slice(0, 50);
+      }
+      
+      updateRecentActivity();
+      saveUserData();
+    }
+
+    // Enhanced chart initialization
+    function initializeCharts() {
+      // Activity Chart
+      const activityCtx = document.getElementById('activityChart');
+      if (activityCtx) {
+        activityChart = new Chart(activityCtx, {
+          type: 'line',
+          data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+              label: 'Places Visited',
+              data: chartData.monthlyActivity.places,
+              borderColor: '#10b981',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              tension: 0.4,
+              fill: true
+            }, {
+              label: 'Reviews Given',
+              data: chartData.monthlyActivity.reviews,
+              borderColor: '#3b82f6',
+              backgroundColor: 'rgba(59, 130, 246, 0.1)',
+              tension: 0.4,
+              fill: true
+            }, {
+              label: 'Events Attended',
+              data: chartData.monthlyActivity.events,
+              borderColor: '#8b5cf6',
+              backgroundColor: 'rgba(139, 92, 246, 0.1)',
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.1)'
+                }
+              },
+              x: {
+                grid: {
+                  color: 'rgba(0, 0, 0, 0.1)'
+                }
+              }
+            },
+            interaction: {
+              intersect: false,
+              mode: 'index'
+            }
+          }
+        });
+      }
+
+      // Category Chart
+      const categoryCtx = document.getElementById('categoryChart');
+      if (categoryCtx) {
+        categoryChart = new Chart(categoryCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Hospitals', 'Malls', 'Transport', 'Restaurants', 'Parks'],
+            datasets: [{
+              data: Object.values(chartData.categories),
+              backgroundColor: [
+                '#ef4444',
+                '#8b5cf6',
+                '#3b82f6',
+                '#f59e0b',
+                '#10b981'
+              ],
+              borderWidth: 2,
+              borderColor: '#ffffff'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom'
+              }
+            },
+            cutout: '60%'
+          }
+        });
+      }
+    }
+
+    // Update charts with new data
+    function updateActivityChart() {
+      if (activityChart) {
+        // Simulate realistic data based on user stats
+        const currentMonth = new Date().getMonth();
+        
+        // Update the current month with actual stats
+        chartData.monthlyActivity.places[currentMonth % 6] = userStats.placesVisited;
+        chartData.monthlyActivity.reviews[currentMonth % 6] = userStats.reviewsGiven;
+        chartData.monthlyActivity.events[currentMonth % 6] = userStats.eventsAttended;
+        
+        activityChart.data.datasets[0].data = chartData.monthlyActivity.places;
+        activityChart.data.datasets[1].data = chartData.monthlyActivity.reviews;
+        activityChart.data.datasets[2].data = chartData.monthlyActivity.events;
+        
+        activityChart.update('active');
+        
+        showNotification('Updated!', 'Activity chart updated with your latest data!', 'success');
+      }
+    }
+
+    function updateCategoryChart() {
+      if (categoryChart) {
+        // Update category data based on user interactions
+        const totalVisits = userStats.placesVisited;
+        if (totalVisits > 0) {
+          // Redistribute percentages based on user activity
+          chartData.categories.hospitals = Math.max(20, 35 + Math.floor(Math.random() * 10));
+          chartData.categories.malls = Math.max(15, 25 + Math.floor(Math.random() * 10));
+          chartData.categories.transport = Math.max(10, 20 + Math.floor(Math.random() * 10));
+          chartData.categories.restaurants = Math.max(8, 12 + Math.floor(Math.random() * 8));
+          chartData.categories.parks = Math.max(5, 8 + Math.floor(Math.random() * 5));
+        }
+        
+        categoryChart.data.datasets[0].data = Object.values(chartData.categories);
+        categoryChart.update('active');
+        
+        showNotification('Updated!', 'Category chart updated with new distribution!', 'success');
+      }
+    }
+
+    // Interactive functions to increment stats
+    function incrementPlacesVisited() {
+      userStats.placesVisited++;
+      const element = document.getElementById('placesVisited');
+      element.classList.add('counter-up');
+      animateValue('placesVisited', userStats.placesVisited - 1, userStats.placesVisited, 500);
+      
+      addActivity(`Visited a new accessible place!`, 'visit');
+      updateProgressBars();
+      calculateAccessibilityScore();
+      saveUserData();
+      
+      showNotification('Great!', 'You visited a new place! Keep exploring!', 'success');
+    }
+
+    function incrementEventsAttended() {
+      userStats.eventsAttended++;
+      const element = document.getElementById('eventsAttended');
+      element.classList.add('counter-up');
+      animateValue('eventsAttended', userStats.eventsAttended - 1, userStats.eventsAttended, 500);
+      
+      addActivity(`Attended an accessibility event!`, 'event');
+      updateProgressBars();
+      calculateAccessibilityScore();
+      saveUserData();
+      
+      showNotification('Awesome!', 'Thanks for attending an accessibility event!', 'success');
+    }
+
+    // Simulate comprehensive activity
+    function simulateActivity() {
+      const activities = [
+        () => incrementPlacesVisited(),
+        () => incrementEventsAttended(),
+        () => {
+          userStats.reviewsGiven++;
+          animateValue('reviewsGiven', userStats.reviewsGiven - 1, userStats.reviewsGiven, 500);
+          addActivity(`Wrote a helpful review!`, 'review', 'Just now', Math.floor(Math.random() * 5) + 1);
+        }
+      ];
+      
+      // Perform multiple activities
+      const numberOfActivities = Math.floor(Math.random() * 3) + 1;
+      for (let i = 0; i < numberOfActivities; i++) {
+        setTimeout(() => {
+          const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+          randomActivity();
+        }, i * 1000);
+      }
+      
+      // Update charts after all activities
+      setTimeout(() => {
+        updateActivityChart();
+        updateCategoryChart();
+        updateProgressBars();
+        calculateAccessibilityScore();
+      }, numberOfActivities * 1000 + 500);
+      
+      showNotification('Simulating...', 'Generating activity and updating your dashboard!', 'info');
+    }
+
+    // Star rating functions
+    function setRating(rating) {
+      currentRating = rating;
+      highlightStars(rating);
+    }
+
+    function highlightStars(rating) {
+      document.querySelectorAll('.star').forEach((star, index) => {
+        if (index < rating) {
+          star.classList.add('active');
+        } else {
+          star.classList.remove('active');
+        }
+      });
+    }
+
+    // Review modal functions
+    function openReviewModal(placeName) {
+      currentPlace = placeName;
+      document.getElementById('reviewPlaceName').textContent = placeName;
+      document.getElementById('reviewModal').classList.add('show');
+      currentRating = 0;
+      highlightStars(0);
+      document.getElementById('reviewText').value = '';
+    }
+
+    function closeReviewModal() {
+      document.getElementById('reviewModal').classList.remove('show');
+    }
+
+    function submitReview() {
+      if (currentRating === 0) {
+        showNotification('Rating Required', 'Please select a rating before submitting your review.', 'error');
+        return;
+      }
+      
+      const reviewText = document.getElementById('reviewText').value.trim();
+      if (!reviewText) {
+        showNotification('Review Required', 'Please write a review before submitting.', 'error');
+        return;
+      }
+      
+      userStats.reviewsGiven++;
+      userStats.totalReviews++;
+      userStats.avgRating = ((parseFloat(userStats.avgRating) * (userStats.totalReviews - 1) + currentRating) / userStats.totalReviews).toFixed(1);
+      
+      addActivity(`Reviewed ${currentPlace}`, 'review', 'Just now', currentRating);
+      
+      updateStats();
+      updateProgressBars();
+      calculateAccessibilityScore();
+      closeReviewModal();
+      saveUserData();
+      
+      showNotification('Thank You!', `Your review for ${currentPlace} has been submitted!`, 'success');
+    }
+
+    // Event registration
+    function registerForEvent(eventName) {
+      userStats.eventsAttended++;
+      addActivity(`Registered for ${eventName}`, 'event');
+      updateStats();
+      updateProgressBars();
+      calculateAccessibilityScore();
+      saveUserData();
+      
+      showNotification('Registered!', `You've registered for ${eventName}!`, 'success');
+    }
+
+    // Initialize map
+    function initializeMap() {
+      if (document.getElementById('map')) {
+        map = L.map('map').setView([19.2183, 72.9781], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Add markers for places
+        places.forEach(place => {
+          const marker = L.marker([place.lat, place.lng]).addTo(map);
+          marker.bindPopup(`
+            <div class="p-2">
+              <h3 class="font-semibold text-gray-800">${place.name}</h3>
+              <p class="text-sm text-gray-600 mb-2">${place.accessibility}</p>
+              <div class="flex items-center space-x-2 mb-2">
+                <div class="flex text-yellow-400">
+                  ${Array(Math.floor(place.rating)).fill('<i class="fas fa-star text-xs"></i>').join('')}
+                </div>
+                <span class="text-sm text-gray-600">${place.rating} (${place.reviews} reviews)</span>
+              </div>
+              <div class="flex space-x-2">
+                <button onclick="visitPlace('${place.name}')" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors">
+                  Visit
+                </button>
+                <button onclick="openReviewModal('${place.name}')" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors">
+                  Review
+                </button>
+              </div>
+            </div>
+          `);
+          marker.category = place.category;
+          markers.push(marker);
+        });
+      }
+    }
+
+    // Save user data to localStorage
+    function saveUserData() {
+      localStorage.setItem('accessibleThaneUser', JSON.stringify(userData));
+      localStorage.setItem('accessibleThaneStats', JSON.stringify(userStats));
+    }
+
+    // Load user preferences
+    function loadUserPreferences() {
+      if (userData.preferences) {
+        const prefs = userData.preferences;
+        
+        // Apply dark mode if enabled
+        if (prefs.darkMode) {
+          document.body.classList.add('dark-mode');
+        }
+        
+        // Apply high contrast if enabled
+        if (prefs.highContrast) {
+          document.body.classList.add('high-contrast');
+        }
+        
+        // Set toggle states
+        if (document.getElementById('highContrastToggle')) {
+          document.getElementById('highContrastToggle').checked = prefs.highContrast || false;
+        }
+        
+        // Set other preferences
+        if (prefs.language && document.getElementById('languageSelect')) {
+          document.getElementById('languageSelect').value = prefs.language;
+        }
+      }
+    }
+
+    // Tab management
+    function showTab(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab
+      document.getElementById(tabName + 'Tab').classList.add('active');
+      
+      // Update navigation
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('text-green-600', 'border-b-2', 'border-green-600');
+        btn.classList.add('text-gray-700');
+      });
+      
+      if (event && event.target) {
+        event.target.classList.remove('text-gray-700');
+        event.target.classList.add('text-green-600', 'border-b-2', 'border-green-600');
+      }
+      
+      // Close mobile menu
+      document.getElementById('mobileMenu').classList.add('hidden');
+    }
+
+    // Search functionality
+    function handleSearch() {
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const resultsContainer = document.getElementById('searchResults');
+      
+      if (query.length < 2) {
+        resultsContainer.innerHTML = '';
+        return;
+      }
+      
+      const filteredPlaces = places.filter(place => 
+        place.name.toLowerCase().includes(query) ||
+        place.category.toLowerCase().includes(query) ||
+        place.accessibility.toLowerCase().includes(query)
+      );
+      
+      resultsContainer.innerHTML = filteredPlaces.map(place => `
+        <div class="glass-morphism rounded-xl p-4 hover-scale cursor-pointer" onclick="selectPlace('${place.name}')">
+          <div class="flex items-start space-x-4">
+            <div class="bg-green-100 rounded-full p-3">
+              <i class="fas fa-${getCategoryIcon(place.category)} text-green-600"></i>
+            </div>
+            <div class="flex-1">
+              <h3 class="font-semibold text-gray-800">${place.name}</h3>
+              <p class="text-sm text-gray-600 mb-2">${place.accessibility}</p>
+              <div class="flex items-center space-x-2 mb-2">
+                <div class="flex text-yellow-400">
+                  ${Array(Math.floor(place.rating)).fill('<i class="fas fa-star text-xs"></i>').join('')}
+                </div>
+                <span class="text-sm text-gray-600">${place.rating} (${place.reviews} reviews)</span>
+              </div>
+              <div class="flex space-x-2">
+                <button onclick="visitPlace('${place.name}'); event.stopPropagation();" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors">
+                  Visit
+                </button>
+                <button onclick="openReviewModal('${place.name}'); event.stopPropagation();" class="bg-yellow-500 text-white px-3 py-1 rounded text-sm hover:bg-yellow-600 transition-colors">
+                  Review
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Get category icon
+    function getCategoryIcon(category) {
+      const icons = {
+        hospital: 'hospital',
+        mall: 'shopping-bag',
+        transport: 'bus',
+        restaurant: 'utensils',
+        park: 'tree',
+        school: 'school',
+        temple: 'place-of-worship'
+      };
+      return icons[category] || 'map-marker-alt';
+    }
+
+    // Select place from search
+    function selectPlace(placeName) {
+      showTab('map');
+      const place = places.find(p => p.name === placeName);
+      if (place && map) {
+        map.setView([place.lat, place.lng], 16);
+        // Find and open the marker popup
+        markers.forEach(marker => {
+          if (marker.getPopup().getContent().includes(placeName)) {
+            marker.openPopup();
+          }
+        });
+      }
+    }
+
+    // Filter map markers
+    function filterMarkers(category) {
+      markers.forEach(marker => {
+        if (category === 'all' || marker.category === category) {
+          marker.setOpacity(1);
+        } else {
+          marker.setOpacity(0.3);
+        }
+      });
+      
+      // Update filter button styles
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('bg-green-600', 'text-white');
+        btn.classList.add('bg-gray-100', 'text-gray-600');
+      });
+      
+      if (event && event.target) {
+        event.target.classList.remove('bg-gray-100', 'text-gray-600');
+        event.target.classList.add('bg-green-600', 'text-white');
+      }
+    }
+
+    // Visit place
+    function visitPlace(placeName) {
+      userStats.placesVisited++;
+      addActivity(`Visited ${placeName}`, 'visit');
+      updateStats();
+      updateProgressBars();
+      calculateAccessibilityScore();
+      saveUserData();
+      showNotification('Great!', `You've visited ${placeName}!`, 'success');
+    }
+
+    // Profile management
+    function showProfile() {
+      document.getElementById('profileModal').classList.add('show');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.remove('show');
+    }
+
+    function saveProfile() {
+      userData.name = document.getElementById('profileNameInput').value;
+      userData.email = document.getElementById('profileEmailInput').value;
+      userData.phone = document.getElementById('profilePhoneInput').value;
+      userData.accessibilityNeeds = document.getElementById('accessibilityNeeds').value;
+      
+      saveUserData();
+      updateUserInterface();
+      closeProfileModal();
+      showNotification('Saved!', 'Profile updated successfully!', 'success');
+    }
+
+    // Settings management
+    function saveSettings() {
+      userData.name = document.getElementById('settingsName').value;
+      userData.email = document.getElementById('settingsEmail').value;
+      userData.phone = document.getElementById('settingsPhone').value;
+      
+      if (!userData.preferences) userData.preferences = {};
+      
+      userData.preferences.highContrast = document.getElementById('highContrastToggle').checked;
+      userData.preferences.language = document.getElementById('languageSelect').value;
+      
+      saveUserData();
+      updateUserInterface();
+      showNotification('Saved!', 'Settings updated successfully!', 'success');
+    }
+
+    // Accessibility functions
+    function increaseFontSize() {
+      currentFontSize = Math.min(currentFontSize + 2, 24);
+      document.body.style.fontSize = currentFontSize + 'px';
+      if (document.getElementById('fontSizeSlider')) {
+        document.getElementById('fontSizeSlider').value = currentFontSize;
+      }
+    }
+
+    function decreaseFontSize() {
+      currentFontSize = Math.max(currentFontSize - 2, 12);
+      document.body.style.fontSize = currentFontSize + 'px';
+      if (document.getElementById('fontSizeSlider')) {
+        document.getElementById('fontSizeSlider').value = currentFontSize;
+      }
+    }
+
+    function toggleHighContrast() {
+      document.body.classList.toggle('high-contrast');
+      if (userData.preferences) {
+        userData.preferences.highContrast = document.body.classList.contains('high-contrast');
+        saveUserData();
+      }
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      if (userData.preferences) {
+        userData.preferences.darkMode = document.body.classList.contains('dark-mode');
+        saveUserData();
+      }
+    }
+
+    // Mobile menu
+    function toggleMobileMenu() {
+      document.getElementById('mobileMenu').classList.toggle('hidden');
+    }
+
+    // Data management
+    function exportData() {
+      const data = {
+        userData: userData,
+        userStats: userStats,
+        exportDate: new Date().toISOString()
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'accessible-thane-data.json';
+      a.click();
+      
+      URL.revokeObjectURL(url);
+      showNotification('Exported!', 'Your data has been downloaded!', 'success');
+    }
+
+    function clearData() {
+      if (confirm('Are you sure you want to clear all activity data? This cannot be undone.')) {
+        userStats = {
+          placesVisited: 0,
+          reviewsGiven: 0,
+          eventsAttended: 0,
+          totalReviews: 0,
+          avgRating: 0.0,
+          helpfulVotes: 0,
+          activities: []
+        };
+        
+        // Reset charts
+        if (activityChart) {
+          chartData.monthlyActivity = {
+            places: [0, 0, 0, 0, 0, 0],
+            reviews: [0, 0, 0, 0, 0, 0],
+            events: [0, 0, 0, 0, 0, 0]
+          };
+          updateActivityChart();
+        }
+        
+        saveUserData();
+        updateStats();
+        updateProgressBars();
+        calculateAccessibilityScore();
+        showNotification('Cleared!', 'Activity data has been cleared!', 'success');
+      }
+    }
+
+    function deleteAccount() {
+      if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+        localStorage.removeItem('accessibleThaneUser');
+        localStorage.removeItem('accessibleThaneStats');
+        window.location.href = 'accessible_thane_login_dynamic.html';
+      }
+    }
+
+    // Logout
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        window.location.href = 'https://dztudxnu.gensparkspace.com/';
+      }
+    }
+
+    // Search place
+    function searchPlace(placeName) {
+      document.getElementById('searchInput').value = placeName;
+      handleSearch();
+    }
+
+    // Notification system
+    function showNotification(title, message, type = 'info') {
+      const notification = document.getElementById('notification');
+      const icon = document.getElementById('notificationIcon');
+      const titleEl = document.getElementById('notificationTitle');
+      const messageEl = document.getElementById('notificationMessage');
+      
+      titleEl.textContent = title;
+      messageEl.textContent = message;
+      
+      // Set icon and color based on type
+      if (type === 'success') {
+        icon.className = 'fas fa-check-circle text-green-600';
+      } else if (type === 'error') {
+        icon.className = 'fas fa-exclamation-circle text-red-600';
+      } else {
+        icon.className = 'fas fa-info-circle text-blue-600';
+      }
+      
+      notification.classList.add('show');
+      
+      // Auto hide after 5 seconds
+      setTimeout(() => {
+        hideNotification();
+      }, 5000);
+    }
+
+    function hideNotification() {
+      document.getElementById('notification').classList.remove('show');
+    }
+
+    // Scroll to top
+    function scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Show/hide back to top button
+    window.addEventListener('scroll', function() {
+      const backToTop = document.getElementById('backToTop');
+      if (window.pageYOffset > 300) {
+        backToTop.classList.remove('hidden');
+      } else {
+        backToTop.classList.add('hidden');
+      }
+    });
+
+    // Font size slider
+    document.addEventListener('DOMContentLoaded', function() {
+      const fontSizeSlider = document.getElementById('fontSizeSlider');
+      if (fontSizeSlider) {
+        fontSizeSlider.addEventListener('input', function() {
+          currentFontSize = parseInt(this.value);
+          document.body.style.fontSize = currentFontSize + 'px';
+        });
+      }
+    });
+
+    // Update charts function
+    function updateCharts() {
+      updateActivityChart();
+      updateCategoryChart();
+    }
+  </script>
+</body>
+</html>
