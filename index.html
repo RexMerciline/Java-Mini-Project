@@ -553,17 +553,7 @@
       }
     });
     
-    places.forEach(place => {
-      L.marker([place.lat, place.lng])
-        .addTo(map)
-        .bindPopup(`
-          <strong>${place.name}</strong><br>
-          Category: ${place.category}<br>
-          Rating: ⭐ ${place.rating} (${place.reviews} reviews)<br>
-          <em>${place.accessibility}</em>
-        `);
-    });
-
+    
     // Redirect to dashboard function
     function redirectToDashboard() {
       document.getElementById('redirectAnimation').classList.add('show');
